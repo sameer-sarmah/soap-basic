@@ -49,5 +49,6 @@
 	<modules>
 		<module>soap-basic-client</module>
 		<module>soap-server-basic-auth</module>
+		<module>soap-basic-auth-cxf-client</module>
 	</modules>
 </project>
