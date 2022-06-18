@@ -50,5 +50,6 @@
 		<module>soap-basic-client</module>
 		<module>soap-server-basic-auth</module>
 		<module>soap-basic-auth-cxf-client</module>
+		<module>soap-basic-auth-camel-client</module>
 	</modules>
 </project>
