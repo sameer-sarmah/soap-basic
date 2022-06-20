@@ -1,6 +1,8 @@
 package northwind.response.handler;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.xml.transform.TransformerException;
@@ -16,11 +18,6 @@ import northwind.util.Util;
 
 @Component
 public class HandlerForDataformatPayload implements IResponseHandler{
-
-	@Override
-	public boolean canHandle(Object response) {
-		return response instanceof CxfPayload;
-	}
 
 	@Override
 	public void handle(Object response) {
@@ -45,6 +42,12 @@ public class HandlerForDataformatPayload implements IResponseHandler{
 			
 		}
 		
+	}
+
+	@Override
+	public boolean canHandle(Object response, Map<String, Object> headers) {
+		String contentType = getContentType(headers);	
+		return contentType.contains("text/xml") && response instanceof CxfPayload;
 	}
 
 }

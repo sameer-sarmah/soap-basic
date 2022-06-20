@@ -46,8 +46,8 @@ public class SoapRouteBuilder extends RouteBuilder {
 		   String endpoint = "cxf://http://localhost:8888/service/customers?serviceClass=northwind.domain.customer.CustomersPort"
 			   		+ "&serviceName=CustomersPortService&wsdlURL=customers.wsdl"
 			   		+"&username="+username+"&password="+password;
-		   endpoint = endpoint +"&dataformat=PAYLOAD";
-		   	  //endpoint=endpoint 	+"&dataformat=MESSAGE";
+		   //endpoint = endpoint +"&dataformat=PAYLOAD";
+		   	 endpoint = endpoint +"&dataformat=RAW";
 		   System.out.println(endpoint);
 		   CxfEndpoint cxfEndpoint = (CxfEndpoint)getContext().getEndpoint(endpoint);
 		   cxfEndpoint.setUsername(username);
@@ -64,7 +64,7 @@ public class SoapRouteBuilder extends RouteBuilder {
             		logHeaders(headers);
             		List<IResponseHandler> relevantResponseHandlers = responseHandlers
             			.stream()
-            			.filter(responseHandler -> responseHandler.canHandle(response))
+            			.filter(responseHandler -> responseHandler.canHandle(response,headers))
             			.collect(Collectors.toList());
             		relevantResponseHandlers.forEach(responseHandler -> responseHandler.handle(response));
             	}

@@ -3,17 +3,13 @@ package northwind.response.handler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ErrorResponseHandler implements IResponseHandler{
-
-	@Override
-	public boolean canHandle(Object response) {
-		return response instanceof InputStream;
-	}
 
 	@Override
 	public void handle(Object response) {
@@ -28,6 +24,12 @@ public class ErrorResponseHandler implements IResponseHandler{
 			 System.out.println(responseBody);
 		}
 		
+	}
+
+	@Override
+	public boolean canHandle(Object response, Map<String, Object> headers) {
+		String contentType = getContentType(headers);	
+		return contentType.contains("application/json") && response instanceof InputStream;
 	}
 
 }

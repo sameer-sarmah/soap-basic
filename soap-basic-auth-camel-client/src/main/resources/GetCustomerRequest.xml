@@ -1,0 +1,7 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <GetCustomerRequest xmlns="http://domain.northwind/customer">
+      <customerID>ALFKI</customerID>
+    </GetCustomerRequest>
+  </soap:Body>
+</soap:Envelope>

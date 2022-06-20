@@ -3,12 +3,14 @@ package northwind.app;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPMessage;
 
 import org.apache.camel.CamelContext;
@@ -47,9 +49,9 @@ public class CustomerCamelClientRunner implements ApplicationRunner{
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-			sendRequestForDataFormatPayload();
+			//sendRequestForDataFormatPayload();
 			//sendRequestForDataFormatPojo();
-			
+			sendRequestForDataFormatMessage();
 		}
 	
 	
@@ -58,18 +60,9 @@ public class CustomerCamelClientRunner implements ApplicationRunner{
 			context.addRoutes(routeBuilder);
 	        context.start();
 	        
-			GetCustomerRequest customerRequest = new GetCustomerRequest();
-			customerRequest.setCustomerID("ALFKI");
-		
-			String customerRequestXml = marshallCustomerRequest(customerRequest);
-			Message message = new DefaultMessage(context);
-			message.setBody(customerRequestXml);
-			
-			SOAPMessage soapMsg = MessageFactory.newInstance()
-					.createMessage(null, IOUtils.toInputStream(customerRequestXml, Charset.defaultCharset().toString()));
-
-			
-			producerTemplate.sendBody("direct:start", customerRequestXml);
+			InputStream inputStream = CustomerCamelClientRunner.class.getClassLoader().getResourceAsStream("GetCustomerRequest.xml");
+			String getCustomerRequest  = IOUtils.toString(inputStream, Charset.defaultCharset());
+			producerTemplate.sendBody("direct:start", getCustomerRequest);
 	        Thread.sleep(10000);
 	        context.stop();
 
@@ -93,10 +86,15 @@ public class CustomerCamelClientRunner implements ApplicationRunner{
 			customerRequest.setCustomerID("ALFKI");
 		
 			String customerRequestXml = marshallCustomerRequest(customerRequest);
-			Message message = new DefaultMessage(context);
-			message.setBody(customerRequestXml);
 			
 			producerTemplate.sendBody("direct:start", customerRequestXml);
+			/*Alternate approach
+			 * 
+			SOAPMessage soapMsg = MessageFactory.newInstance()
+					.createMessage(null, IOUtils.toInputStream(customerRequestXml, Charset.defaultCharset().toString()));
+			producerTemplate.sendBody("direct:start", soapMsg);
+			 * 
+			 * */
 	        Thread.sleep(10000);
 	        context.stop();
 
