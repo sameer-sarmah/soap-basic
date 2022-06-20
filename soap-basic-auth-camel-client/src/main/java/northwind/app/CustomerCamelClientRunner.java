@@ -1,7 +1,21 @@
 package northwind.app;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPMessage;
+
 import org.apache.camel.CamelContext;
+import org.apache.camel.Message;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.support.DefaultMessage;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -33,13 +47,29 @@ public class CustomerCamelClientRunner implements ApplicationRunner{
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
+			sendRequestForDataFormatPayload();
+			//sendRequestForDataFormatPojo();
+			
+		}
+	
+	
+	private void sendRequestForDataFormatMessage() {
 		try {
 			context.addRoutes(routeBuilder);
 	        context.start();
 	        
 			GetCustomerRequest customerRequest = new GetCustomerRequest();
 			customerRequest.setCustomerID("ALFKI");
-			producerTemplate.sendBody("direct:start", customerRequest);
+		
+			String customerRequestXml = marshallCustomerRequest(customerRequest);
+			Message message = new DefaultMessage(context);
+			message.setBody(customerRequestXml);
+			
+			SOAPMessage soapMsg = MessageFactory.newInstance()
+					.createMessage(null, IOUtils.toInputStream(customerRequestXml, Charset.defaultCharset().toString()));
+
+			
+			producerTemplate.sendBody("direct:start", customerRequestXml);
 	        Thread.sleep(10000);
 	        context.stop();
 
@@ -52,6 +82,79 @@ public class CustomerCamelClientRunner implements ApplicationRunner{
 				System.err.println("ExceptionMessage="+e.getMessage());
 			}
 		}
+	}
+	
+	private void sendRequestForDataFormatPayload() {
+		try {
+			context.addRoutes(routeBuilder);
+	        context.start();
+	        
+			GetCustomerRequest customerRequest = new GetCustomerRequest();
+			customerRequest.setCustomerID("ALFKI");
+		
+			String customerRequestXml = marshallCustomerRequest(customerRequest);
+			Message message = new DefaultMessage(context);
+			message.setBody(customerRequestXml);
+			
+			producerTemplate.sendBody("direct:start", customerRequestXml);
+	        Thread.sleep(10000);
+	        context.stop();
+
+		}
+		catch (Exception e) {
+			if(e instanceof WebServiceTransportException) {
+				System.err.println("[WebServiceTransportException]	ExceptionMessage="+e.getMessage());
+			}
+			else {
+				System.err.println("ExceptionMessage="+e.getMessage());
+			}
+		}
+	}
+	
+	private void sendRequestForDataFormatPojo() {
+		try {
+			context.addRoutes(routeBuilder);
+	        context.start();
+	        
+			GetCustomerRequest customerRequest = new GetCustomerRequest();
+			customerRequest.setCustomerID("ALFKI");
+			
+	      	producerTemplate.sendBody("direct:start", customerRequest);
+	        Thread.sleep(10000);
+	        context.stop();
+
+		}
+		catch (Exception e) {
+			if(e instanceof WebServiceTransportException) {
+				System.err.println("[WebServiceTransportException]	ExceptionMessage="+e.getMessage());
+			}
+			else {
+				System.err.println("ExceptionMessage="+e.getMessage());
+			}
+		}
+	}
+	
+	private String marshallCustomerRequest(GetCustomerRequest customerRequest) {
+
+		try {
+			JAXBContext jaxBcontext = JAXBContext.newInstance(northwind.domain.customer.GetCustomerRequest.class);
+			 Marshaller marshaller = jaxBcontext.createMarshaller();
+	        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+	        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+	        var outputStream = new ByteArrayOutputStream();
+	        marshaller.marshal(customerRequest, outputStream);
+	        var inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+	        String customerRequestXml = IOUtils.toString(inputStream, Charset.defaultCharset());
+	        return customerRequestXml;
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
 	}
 
 }
