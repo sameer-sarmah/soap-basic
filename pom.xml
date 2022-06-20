@@ -51,5 +51,6 @@
 		<module>soap-server-basic-auth</module>
 		<module>soap-basic-auth-cxf-client</module>
 		<module>soap-basic-auth-camel-client</module>
+		<module>soap-basic-auth-jaxws-client</module>
 	</modules>
 </project>
